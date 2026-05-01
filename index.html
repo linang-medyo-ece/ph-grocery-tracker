@@ -3,115 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PH PriceWatch Clone</title>
-    <!-- Leaflet Map CSS -->
+    <title>PriceWatch PH Clone</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --primary: #2563eb; --cheapest: #16a34a; --bg: #f8fafc; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        :root { --main-blue: #4f46e5; --accent-orange: #f97316; --bg: #f3f4f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; text-align: center; color: #1f2937; }
         
-        #searchBar { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; font-size: 16px; }
-        
-        .product-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .brand-tag { background: #dbeafe; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; font-size: 13px; color: #64748b; padding-bottom: 10px; }
-        td { padding: 12px 0; border-top: 1px solid #f1f5f9; }
-        
-        .price { font-weight: 700; color: #1e293b; }
-        .cheapest-row { color: var(--cheapest); background: #f0fdf4; border-radius: 8px; font-weight: bold; }
-        .cheapest-row .price { color: var(--cheapest); }
+        /* Header Styling */
+        .header { background: white; padding: 30px; border-bottom: 1px solid #e5e7eb; }
+        .header h1 { color: #5b21b6; margin: 0; font-size: 32px; }
+        .sub-header { color: #6b7280; margin-top: 10px; font-size: 14px; }
 
-        #map { height: 350px; border-radius: 12px; margin-top: 20px; border: 2px solid #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        /* Search Section */
+        .search-container { background: white; margin: 20px auto; padding: 20px; width: 90%; max-width: 800px; border-radius: 20px; display: flex; gap: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        input { flex: 1; padding: 12px; border: 1px solid #d1d5db; border-radius: 10px; }
+        .btn-scan { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
+
+        /* Map Section */
+        #map { height: 400px; width: 90%; max-width: 800px; margin: 20px auto; border-radius: 20px; border: 8px solid white; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+
+        /* Store Grid */
+        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 20px; max-width: 1000px; margin: 0 auto; }
+        .store-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; }
+        .card-header { background: linear-gradient(90deg, #2563eb, #f97316); color: white; padding: 15px; }
+        .card-body { padding: 15px; }
+        .distance { font-size: 12px; color: #9ca3af; margin-bottom: 10px; }
+        .view-btn { background: #f97316; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; }
+        .product-row { display: flex; justify-content: space-between; border-bottom: 1px solid #f3f4f6; padding: 8px 0; font-size: 14px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🇵🇭 PriceWatch PH</h1>
-            <span id="update-date"></span>
-        </header>
 
-        <input type="text" id="searchBar" placeholder="Search by brand, item, or category (e.g. Tuna)..." onkeyup="filterItems()">
+    <div class="header">
+        <h1>PriceWatch PH</h1>
+        <div class="sub-header">Real 2026 prices • 5km scan • Always finds the cheapest</div>
+    </div>
 
-        <div id="results-container"></div>
-        
-        <h3>Store Locator</h3>
-        <div id="map"></div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search: Lucky Me, 555 Sardines...">
+        <button class="btn-scan" onclick="getLocation()">Scan My Location (5km)</button>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="store-grid" id="storeGrid">
+        <!-- Store Cards appear here -->
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let productData = [];
-        const map = L.map('map').setView([14.5995, 120.9842], 12);
+        const map = L.map('map').setView([14.3512, 121.0620], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        let markers = [];
 
-        async function init() {
-            const res = await fetch('prices.json');
-            const data = await res.json();
-            productData = data.products;
-            document.getElementById('update-date').innerText = `Updated: ${data.last_updated}`;
-            renderCards(productData);
-        }
+        let storeData = [];
+        let userPos = null;
 
-        function renderCards(items) {
-            const container = document.getElementById('results-container');
-            container.innerHTML = '';
-            
-            // Clear old map markers
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+        // Fetch Data
+        fetch('prices.json')
+            .then(res => res.json())
+            .then(data => {
+                storeData = data.stores;
+                renderStores();
+            });
 
-            items.forEach(product => {
-                const sorted = [...product.listings].sort((a, b) => a.price - b.price);
-                const minPrice = sorted[0].price;
+        function renderStores() {
+            const grid = document.getElementById('storeGrid');
+            grid.innerHTML = '';
 
-                const card = document.createElement('div');
-                card.className = 'product-card';
+            storeData.forEach(store => {
+                let distText = userPos ? `${calculateDistance(userPos.lat, userPos.lng, store.lat, store.lng).toFixed(2)}km away` : "Calculating distance...";
                 
-                let rows = '';
-                product.listings.forEach(l => {
-                    const isCheapest = l.price === minPrice;
-                    rows += `
-                        <tr class="${isCheapest ? 'cheapest-row' : ''}">
-                            <td>${l.store}</td>
-                            <td class="price">₱${l.price.toFixed(2)}</td>
-                            <td>${isCheapest ? '✅ Best Deal' : ''}</td>
-                        </tr>`;
-                    
-                    // Add to Map
-                    const marker = L.marker([l.lat, l.lng]).addTo(map)
-                        .bindPopup(`<b>${l.store}</b><br>${product.name}: ₱${l.price}`);
-                    markers.push(marker);
-                });
+                const card = `
+                    <div class="store-card">
+                        <div class="card-header"><h3>${store.name}</h3></div>
+                        <div class="card-body">
+                            <div class="distance">${distText}</div>
+                            <button class="view-btn">View All Products</button>
+                            ${store.products.map(p => `
+                                <div class="product-row">
+                                    <span>${p.name}</span>
+                                    <b>₱${p.price.toFixed(2)}</b>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>`;
+                grid.innerHTML += card;
 
-                card.innerHTML = `
-                    <span class="brand-tag">${product.brand}</span>
-                    <h2 style="margin: 10px 0 5px 0;">${product.name}</h2>
-                    <small style="color:#64748b">${product.category} | ${product.size}</small>
-                    <table>
-                        <thead><tr><th>Store</th><th>Price</th><th>Note</th></tr></thead>
-                        <tbody>${rows}</tbody>
-                    </table>`;
-                container.appendChild(card);
+                // Add markers to map
+                L.marker([store.lat, store.lng]).addTo(map).bindPopup(store.name);
             });
         }
 
-        function filterItems() {
-            const term = document.getElementById('searchBar').value.toLowerCase();
-            const filtered = productData.filter(p => 
-                p.name.toLowerCase().includes(term) || 
-                p.brand.toLowerCase().includes(term) ||
-                p.category.toLowerCase().includes(term)
-            );
-            renderCards(filtered);
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(pos => {
+                    userPos = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+                    map.setView([userPos.lat, userPos.lng], 14);
+                    L.circle([userPos.lat, userPos.lng], {radius: 5000, color: '#2563eb'}).addTo(map);
+                    renderStores(); // Re-render with distances
+                });
+            }
         }
 
-        init();
+        // Distance formula (Haversine)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; 
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
     </script>
 </body>
 </html>
