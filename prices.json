@@ -1,14 +1,75 @@
-[
-  {
-    "date": "2026-05-01",
-    "item": "Rice (5kg)",
-    "store": "SM Markets",
-    "price": 285.00
-  },
-  {
-    "date": "2026-05-01",
-    "item": "Canned Tuna",
-    "store": "Puregold",
-    "price": 38.50
-  }
-]
+{
+  "last_updated": "2026-05-01",
+  "products": [
+    {
+      "category": "Canned Sardines",
+      "name": "Mega Sardines in Tomato Sauce",
+      "brand": "Mega",
+      "size": "155g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 23.75, "lat": 14.5547, "lng": 121.0244},
+        {"store": "Puregold", "price": 24.00, "lat": 14.5580, "lng": 121.0300}
+      ]
+    },
+    {
+      "category": "Canned Meat",
+      "name": "Argentina Corned Beef",
+      "brand": "Argentina",
+      "size": "150g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 36.75, "lat": 14.5547, "lng": 121.0244},
+        {"store": "Puregold", "price": 35.00, "lat": 14.5580, "lng": 121.0300}
+      ]
+    },
+    {
+      "category": "Instant Noodles",
+      "name": "Lucky Me! Pancit Canton Chilimansi",
+      "brand": "Lucky Me!",
+      "size": "80g",
+      "listings": [
+        {"store": "Puregold", "price": 13.00, "lat": 14.5580, "lng": 121.0300},
+        {"store": "SM Supermarket", "price": 14.25, "lat": 14.5547, "lng": 121.0244}
+      ]
+    },
+    {
+      "category": "Milk Powder",
+      "name": "Bear Brand Fortified",
+      "brand": "Bear Brand",
+      "size": "135g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 50.00, "lat": 14.5547, "lng": 121.0244},
+        {"store": "DTI SRP", "price": 50.00, "lat": 14.5995, "lng": 120.9842}
+      ]
+    },
+    {
+      "category": "Bread",
+      "name": "Pinoy Tasty",
+      "brand": "Generic",
+      "size": "450g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 44.00, "lat": 14.5547, "lng": 121.0244},
+        {"store": "Puregold", "price": 44.00, "lat": 14.5580, "lng": 121.0300}
+      ]
+    },
+    {
+      "category": "Coffee",
+      "name": "Nescafe Original 3-in-1",
+      "brand": "Nescafe",
+      "size": "20g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 7.75, "lat": 14.5547, "lng": 121.0244},
+        {"store": "Puregold", "price": 7.50, "lat": 14.5580, "lng": 121.0300}
+      ]
+    },
+    {
+      "category": "Laundry Soap",
+      "name": "Surf with Tawas Bar",
+      "brand": "Surf",
+      "size": "360g",
+      "listings": [
+        {"store": "SM Supermarket", "price": 23.00, "lat": 14.5547, "lng": 121.0244},
+        {"store": "Puregold", "price": 22.50, "lat": 14.5580, "lng": 121.0300}
+      ]
+    }
+  ]
+}
