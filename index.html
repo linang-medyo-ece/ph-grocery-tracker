@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PriceWatch PH | Compare Grocery Prices</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1><i class="fas fa-search-dollar"></i> PriceWatch PH</h1>
+            <p>Real-time grocery price comparison in the Philippines</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search for products (e.g., Coca-Cola, Bread, Shampoo)...">
+                <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="popular-searches">
+                <span>Popular:</span>
+                <button onclick="quickSearch('Coca-Cola')">Coca-Cola</button>
+                <button onclick="quickSearch('Bear Brand')">Bear Brand</button>
+                <button onclick="quickSearch('Gardenia')">Gardenia</button>
+                <button onclick="quickSearch('Safeguard')">Safeguard</button>
+            </div>
+        </section>
+
+        <!-- Store Filters -->
+        <section class="stores-section">
+            <div class="store-card" data-store="alfamart" style="border-top: 5px solid #e53e3e;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/8/86/Alfamart_logo.svg" alt="Alfamart" height="30">
+                <p>View Alfamart Prices</p>
+            </div>
+            <div class="store-card" data-store="seven-eleven" style="border-top: 5px solid #ff6b01;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/4/40/7-eleven_logo.svg" alt="7-Eleven" height="30">
+                <p>View 7-Eleven Prices</p>
+            </div>
+            <div class="store-card" data-store="dali" style="border-top: 5px solid #38a169;">
+                <span class="dali-logo">DALI</span>
+                <p>View Dali Prices</p>
+            </div>
+            <div class="store-card" data-store="indomaret" style="border-top: 5px solid #3182ce;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/9d/Logo_Indomaret.png" alt="Indomaret" height="25">
+                <p>View Indomaret Prices</p>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <section class="controls" id="live-prices">
+            <div class="filter-group">
+                <label>Category:</label>
+                <select id="categoryFilter" onchange="filterProducts()">
+                    <option value="all">All Categories</option>
+                    <option value="beverages">Beverages</option>
+                    <option value="dairy">Dairy</option>
+                    <option value="snacks">Snacks</option>
+                    <option value="personal-care">Personal Care</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Sort By:</label>
+                <select id="sortBy" onchange="sortProducts()">
+                    <option value="best-price">Lowest Price First</option>
+                    <option value="name">Product Name (A-Z)</option>
+                    <option value="savings">Highest Savings First</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Fetching latest prices...</p>
+        </div>
+
+        <!-- Results Container -->
+        <section id="resultsContainer" class="results-container">
+            <!-- Product Cards will be injected here by JS -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 PriceWatch PH. All prices are for demonstration based on January 2024 data.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
