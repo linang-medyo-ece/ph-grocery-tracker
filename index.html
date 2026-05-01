@@ -2,41 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PH Grocery Price Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PH PriceWatch Clone</title>
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f4f4f9; }
-        h1 { color: #2c3e50; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #3498db; color: white; }
-        tr:hover { background-color: #f1f1f1; }
+        :root { --primary: #2563eb; --cheapest: #16a34a; --bg: #f8fafc; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        #searchBar { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; font-size: 16px; }
+        
+        .product-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .brand-tag { background: #dbeafe; color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; font-size: 13px; color: #64748b; padding-bottom: 10px; }
+        td { padding: 12px 0; border-top: 1px solid #f1f5f9; }
+        
+        .price { font-weight: 700; color: #1e293b; }
+        .cheapest-row { color: var(--cheapest); background: #f0fdf4; border-radius: 8px; font-weight: bold; }
+        .cheapest-row .price { color: var(--cheapest); }
+
+        #map { height: 350px; border-radius: 12px; margin-top: 20px; border: 2px solid #fff; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
     </style>
 </head>
 <body>
-    <h1>🇵🇭 Grocery Price Tracker</h1>
-    <p>Latest prices fetched from Philippine supermarkets.</p>
-    <div id="table-container">Loading latest prices...</div>
+    <div class="container">
+        <header>
+            <h1>🇵🇭 PriceWatch PH</h1>
+            <span id="update-date"></span>
+        </header>
 
+        <input type="text" id="searchBar" placeholder="Search by brand, item, or category (e.g. Tuna)..." onkeyup="filterItems()">
+
+        <div id="results-container"></div>
+        
+        <h3>Store Locator</h3>
+        <div id="map"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        fetch('prices.json')
-            .then(res => res.json())
-            .then(data => {
-                let table = `<table>
-                    <thead>
-                        <tr><th>Date</th><th>Item</th><th>Store</th><th>Price (PHP)</th></tr>
-                    </thead>
-                    <tbody>`;
-                data.forEach(row => {
-                    table += `<tr>
-                        <td>${row.date}</td>
-                        <td>${row.item}</td>
-                        <td>${row.store}</td>
-                        <td>₱${row.price.toFixed(2)}</td>
-                    </tr>`;
+        let productData = [];
+        const map = L.map('map').setView([14.5995, 120.9842], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        let markers = [];
+
+        async function init() {
+            const res = await fetch('prices.json');
+            const data = await res.json();
+            productData = data.products;
+            document.getElementById('update-date').innerText = `Updated: ${data.last_updated}`;
+            renderCards(productData);
+        }
+
+        function renderCards(items) {
+            const container = document.getElementById('results-container');
+            container.innerHTML = '';
+            
+            // Clear old map markers
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            items.forEach(product => {
+                const sorted = [...product.listings].sort((a, b) => a.price - b.price);
+                const minPrice = sorted[0].price;
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                let rows = '';
+                product.listings.forEach(l => {
+                    const isCheapest = l.price === minPrice;
+                    rows += `
+                        <tr class="${isCheapest ? 'cheapest-row' : ''}">
+                            <td>${l.store}</td>
+                            <td class="price">₱${l.price.toFixed(2)}</td>
+                            <td>${isCheapest ? '✅ Best Deal' : ''}</td>
+                        </tr>`;
+                    
+                    // Add to Map
+                    const marker = L.marker([l.lat, l.lng]).addTo(map)
+                        .bindPopup(`<b>${l.store}</b><br>${product.name}: ₱${l.price}`);
+                    markers.push(marker);
                 });
-                table += '</tbody></table>';
-                document.getElementById('table-container').innerHTML = table;
+
+                card.innerHTML = `
+                    <span class="brand-tag">${product.brand}</span>
+                    <h2 style="margin: 10px 0 5px 0;">${product.name}</h2>
+                    <small style="color:#64748b">${product.category} | ${product.size}</small>
+                    <table>
+                        <thead><tr><th>Store</th><th>Price</th><th>Note</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>`;
+                container.appendChild(card);
             });
+        }
+
+        function filterItems() {
+            const term = document.getElementById('searchBar').value.toLowerCase();
+            const filtered = productData.filter(p => 
+                p.name.toLowerCase().includes(term) || 
+                p.brand.toLowerCase().includes(term) ||
+                p.category.toLowerCase().includes(term)
+            );
+            renderCards(filtered);
+        }
+
+        init();
     </script>
 </body>
 </html>
